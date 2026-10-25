@@ -1,11 +1,32 @@
-# Serves bootstrap.sh at the root, as plain text, for: curl -fsSL https://setup.jasielrivera.com | bash
+# setup.jasielrivera.com
+#   browsers           -> index.html (instructions)
+#   curl / wget at /   -> bootstrap.sh, so `curl -fsSL https://setup.jasielrivera.com | bash` works
+#   /bootstrap.sh      -> the script, for anything
 # Coolify's proxy terminates TLS and forwards here on :80.
 :80 {
 	root * /srv
-	header Content-Type "text/plain; charset=utf-8"
 	header Cache-Control "no-store"
-	rewrite / /bootstrap.sh
-	@notscript not path /bootstrap.sh
-	respond @notscript "Not found" 404
-	file_server
+	header Vary "User-Agent"
+
+	@script path /bootstrap.sh
+	@cli_root {
+		path /
+		header_regexp User-Agent (?i)^(curl|wget)/
+	}
+
+	handle @script {
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+	handle @cli_root {
+		rewrite * /bootstrap.sh
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+	handle / {
+		file_server
+	}
+	handle {
+		respond "Not found" 404
+	}
 }

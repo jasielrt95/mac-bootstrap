@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mac setup</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root {
+    --bg: #fbfaf8; --fg: #1d1d1f; --muted: #6e6e73; --line: #e5e3df;
+    --card: #ffffff; --code-bg: #1d1d1f; --code-fg: #f5f5f7; --accent: #0a7c5a;
+    --warn-bg: #fff7e6; --warn-line: #f0d9a8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141414; --fg: #f2f2f2; --muted: #a1a1a6; --line: #2c2c2e;
+      --card: #1c1c1e; --code-bg: #000; --code-fg: #f5f5f7; --accent: #4fd1a5;
+      --warn-bg: #2a2416; --warn-line: #4a3f22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 56px 16px 80px; }
+  h1 { font-size: 32px; letter-spacing: -0.02em; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 40px 0 12px; }
+  p { margin: 0 0 12px; }
+  .lede { color: var(--muted); font-size: 18px; margin-bottom: 28px; }
+  .cmd {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--code-bg); color: var(--code-fg);
+    border-radius: 12px; padding: 14px 14px 14px 18px;
+  }
+  .cmd code { flex: 1; overflow-x: auto; white-space: nowrap; font: 15px/1.4 ui-monospace, "SF Mono", Menlo, monospace; }
+  button.copy {
+    flex: none; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+    background: var(--accent); color: #fff; font: 600 14px -apple-system, sans-serif;
+  }
+  button.copy:active { transform: translateY(1px); }
+  .hint { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  ol, ul { padding-left: 22px; margin: 0 0 12px; }
+  li { margin: 6px 0; }
+  code.inline { font: 14px ui-monospace, "SF Mono", Menlo, monospace; background: var(--line); padding: 1px 6px; border-radius: 5px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 12px; padding: 14px 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { width: 42%; padding-right: 12px; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mac setup</h1>
+  <p class="lede">Turns a fresh Mac into my Mac: tools, apps, shell, GitHub, keys and repos. Open Terminal and paste this:</p>
+
+  <div class="cmd">
+    <code id="cmd">curl -fsSL https://setup.jasielrivera.com | bash</code>
+    <button class="copy" type="button" onclick="copyCmd(this)">Copy</button>
+  </div>
+  <p class="hint">Terminal is in Applications → Utilities, or press ⌘ Space and type “Terminal”.</p>
+
+  <div class="warn" style="margin-top:20px">
+    <strong>Personal setup.</strong> This is for my own Macs and only works with my accounts. The script asks you to type <code class="inline">yes</code> before it installs anything.
+  </div>
+
+  <h2>What happens</h2>
+  <ol>
+    <li><strong>Confirmation:</strong> type <code class="inline">yes</code> to go on.</li>
+    <li><strong>Apple's command line tools:</strong> a window pops up; click Install and wait (a few minutes).</li>
+    <li><strong>Homebrew:</strong> asks for the Mac's password once.</li>
+    <li><strong>GitHub:</strong> shows a one-time code and opens the browser to sign in.</li>
+    <li><strong>Private setup repo</strong> is cloned to <code class="inline">~/Developer/mac-setup</code>.</li>
+    <li><strong>Guided setup:</strong> asks what kind of Mac this is, then goes step by step, explaining each one and letting you skip any. Ends with a summary.</li>
+  </ol>
+
+  <h2>Have these ready</h2>
+  <ul>
+    <li>The Mac's password (for Homebrew).</li>
+    <li>GitHub login (and phone for 2FA).</li>
+    <li>The password manager: the guided setup asks for the <strong>Infisical machine identity</strong> (client ID and secret) once, to restore the infra keys.</li>
+    <li>About 30–60 minutes, mostly downloads.</li>
+  </ul>
+
+  <h2>Kinds of Mac</h2>
+  <table>
+    <tr><td><strong>Workstation</strong></td><td>Command-line tools only.</td></tr>
+    <tr><td><strong>Workstation with apps</strong></td><td>Tools plus my desktop apps (editors, browsers, AI apps, Docker…). The default.</td></tr>
+    <tr><td><strong>Home server</strong></td><td>Tools plus OrbStack, never-sleep power settings, and a short checklist (Tailscale sign-in, Remote Login, Screen Sharing, router reservation, FileVault).</td></tr>
+  </table>
+
+  <h2>Afterwards</h2>
+  <table>
+    <tr><td><code class="inline">~/Developer/mac-setup/setup.sh --check</code></td><td>See what's done and what's missing. Changes nothing.</td></tr>
+    <tr><td><code class="inline">~/Developer/mac-setup/setup.sh --guided</code></td><td>Run the guided setup again (safe; done steps are skipped).</td></tr>
+    <tr><td><code class="inline">~/Developer/mac-setup/setup.sh secrets</code></td><td>Run a single step (homebrew, packages, shell, git, ssh, secrets, coolify, repos, server).</td></tr>
+    <tr><td>Running the one-liner again</td><td>Safe too: it skips what's installed and updates the setup repo.</td></tr>
+  </table>
+
+  <h2>If something goes wrong</h2>
+  <ul>
+    <li><strong>Stopped at the command line tools:</strong> finish the Install window, then run the command again.</li>
+    <li><strong>“brew: command not found” in a new window:</strong> open a new Terminal window (the setup adds Homebrew to <code class="inline">~/.zprofile</code>).</li>
+    <li><strong>GitHub sign-in failed:</strong> run <code class="inline">gh auth login --web</code>, then the command again.</li>
+    <li><strong>Can't reach the server over SSH:</strong> the <code class="inline">ssh</code> step prints the one command to run from a Mac that already has access.</li>
+    <li><strong>Try it without changing anything:</strong> <code class="inline">curl -fsSL https://setup.jasielrivera.com | BOOTSTRAP_NO_RUN=1 bash</code> stops before the guided setup.</li>
+  </ul>
+
+  <h2>Where this lives</h2>
+  <ul>
+    <li>This page and the script: <a href="https://github.com/jasielrt95/mac-bootstrap">github.com/jasielrt95/mac-bootstrap</a> (public; no secrets). Hosted in Coolify, project Ops, app <em>mac-bootstrap</em>. After editing, redeploy it there.</li>
+    <li>The real setup: the private <em>mac-setup</em> repo (Brewfiles, <code class="inline">setup.sh</code>, the Keychain map). Its README has the details.</li>
+  </ul>
+
+  <footer>Paste into Terminal, type yes, follow along.</footer>
+</main>
+<script>
+  function copyCmd(btn) {
+    const text = document.getElementById("cmd").textContent;
+    const done = () => { btn.textContent = "Copied"; setTimeout(() => (btn.textContent = "Copy"), 1500); };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(done, () => fallback(text, done));
+    } else {
+      fallback(text, done);
+    }
+  }
+  function fallback(text, done) {
+    const t = document.createElement("textarea");
+    t.value = text; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); done(); } finally { t.remove(); }
+  }
+</script>
+</body>
+</html>
