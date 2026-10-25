@@ -78,11 +78,19 @@ main() {
   # 4. After a macOS update the command line tools can be "too outdated" for
   # Homebrew, and installs fail. Homebrew's own check says so; Software Update
   # usually has the newer tools.
-  if brew doctor 2>&1 | grep -qi "Command Line Tools are too outdated"; then
+  # Captured first, NOT piped into `grep -q`: with pipefail, grep exiting early
+  # made the check silently pass. Backup check: tools older than macOS itself.
+  local report clt os outdated=0
+  report="$(brew doctor 2>&1 || true)"
+  case "$report" in *"Command Line Tools are too outdated"*) outdated=1 ;; esac
+  clt="$(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables 2>/dev/null | awk '/^version:/{split($2,v,"."); print v[1]}')"
+  os="$(sw_vers -productVersion | cut -d. -f1)"
+  if [ -n "$clt" ] && [ "$clt" -lt "$os" ]; then outdated=1; fi
+  if [ "$outdated" = 1 ]; then
     bold "Updating Apple's command line tools (Homebrew says they're too outdated)"
     local flag=/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress label reply
     touch "$flag"
-    label="$(softwareupdate --list 2>/dev/null | sed -n 's/^[* ]*Label: \(Command Line Tools.*\)$/\1/p' | tail -1)"
+    label="$( { softwareupdate --list 2>/dev/null || true; } | sed -n 's/^[* ]*Label: \(Command Line Tools.*\)$/\1/p' | tail -1)"
     rm -f "$flag"
     if [ -n "$label" ]; then
       echo "  Installing $label (asks for your Mac password)"
@@ -90,16 +98,17 @@ main() {
     else
       echo "  Software Update doesn't offer an update. Homebrew's fix is to reinstall them:"
       echo "  remove /Library/Developer/CommandLineTools, then run Apple's installer again."
-      printf '  Reinstall the command line tools now? [y/N] '
+      echo "  (Homebrew can't install anything until this is done.)"
+      printf '  Reinstall the command line tools now? [Y/n] '
       read -r reply <"$TTY" || reply=""
-      case "$reply" in
+      case "${reply:-y}" in
         [Yy]*)
           sudo rm -rf /Library/Developer/CommandLineTools <"$TTY"
           xcode-select --install >/dev/null 2>&1 || true
           echo "  Click Install in the window that opens; waiting for it to finish"
           until xcode-select -p >/dev/null 2>&1 && [ -x /Library/Developer/CommandLineTools/usr/bin/clang ]; do sleep 10; printf '.'; done
           echo ;;
-        *) echo "  Skipped: installs may fail until the tools are updated (System Settings → General → Software Update)." ;;
+        *) echo "  Skipped: installs will fail until the tools are updated (System Settings → General → Software Update, or https://developer.apple.com/download/all/)." ;;
       esac
     fi
   fi
