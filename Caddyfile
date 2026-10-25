@@ -2,6 +2,7 @@
 #   browsers           -> index.html (instructions)
 #   curl / wget at /   -> bootstrap.sh, so `curl -fsSL https://setup.jasielrivera.com | bash` works
 #   /bootstrap.sh      -> the script, for anything
+#   /og.png            -> link-preview image
 # Coolify's proxy terminates TLS and forwards here on :80.
 :80 {
 	root * /srv
@@ -9,6 +10,7 @@
 	header Vary "User-Agent"
 
 	@script path /bootstrap.sh
+	@image path /og.png
 	@cli_root {
 		path /
 		header_regexp User-Agent (?i)^(curl|wget)/
@@ -16,6 +18,9 @@
 
 	handle @script {
 		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+	handle @image {
 		file_server
 	}
 	handle @cli_root {
