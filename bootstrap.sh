@@ -3,7 +3,7 @@
 #
 #   curl -fsSL https://setup.jasielrivera.com | bash
 #
-# Installs Apple's command line tools, Homebrew and the GitHub CLI, signs in to
+# Installs Apple's command line tools, Homebrew, Claude Code, Codex and the GitHub CLI, signs in to
 # GitHub, clones the private mac-setup repo and starts its guided setup.
 # Contains no secrets: everything sensitive needs your GitHub sign-in, and the
 # infra secrets need your Infisical identity on top of that.
@@ -66,7 +66,16 @@ main() {
   if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; else eval "$(/usr/local/bin/brew shellenv)"; fi
   grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null || echo "eval \"\$($(command -v brew) shellenv)\"" >>"$HOME/.zprofile"
 
-  # 2b. After a macOS update the command line tools can be "too outdated" for
+  # 3. Claude Code and Codex first, so a coding agent is on this Mac (for local or
+  # remote sessions) even if a later step needs help. Casks: nothing to compile,
+  # so this works even when the command line tools are outdated.
+  local c
+  for c in claude-code codex; do
+    brew list --cask "$c" >/dev/null 2>&1 || { bold "Installing $c"; brew install --cask "$c"; }
+  done
+  ok "Claude Code $(claude --version 2>/dev/null | awk '{print $1}') and Codex $(codex --version 2>/dev/null | awk '{print $NF}')"
+
+  # 4. After a macOS update the command line tools can be "too outdated" for
   # Homebrew, and installs fail. Homebrew's own check says so; Software Update
   # usually has the newer tools.
   if brew doctor 2>&1 | grep -qi "Command Line Tools are too outdated"; then
@@ -96,7 +105,7 @@ main() {
   fi
   ok "Command line tools up to date"
 
-  # 3. GitHub CLI + sign-in (shows a one-time code and opens the browser).
+  # 5. GitHub CLI + sign-in (shows a one-time code and opens the browser).
   command -v gh >/dev/null 2>&1 || { bold "Installing the GitHub CLI"; brew install gh; }
   ok "GitHub CLI"
   if gh auth status >/dev/null 2>&1; then
@@ -107,7 +116,7 @@ main() {
   fi
   gh auth setup-git
 
-  # 4. The private setup repo.
+  # 6. The private setup repo.
   if [ -d "$SETUP_DIR/.git" ]; then
     git -C "$SETUP_DIR" pull --ff-only --quiet && ok "mac-setup up to date"
   else
@@ -117,8 +126,9 @@ main() {
 
   if [ "${BOOTSTRAP_NO_RUN:-0}" = 1 ]; then ok "BOOTSTRAP_NO_RUN=1: stopping before the guided setup"; return; fi
 
-  # 5. Guided setup.
+  # 7. Guided setup.
   bold "Starting the guided setup"
+  echo "  Stuck at any point? Open a new Terminal window and run: claude"
   exec "$SETUP_DIR/setup.sh" --guided <"$TTY"
 }
 
