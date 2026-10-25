@@ -44,7 +44,6 @@
   li { margin: 6px 0; }
   code.inline { font: 14px ui-monospace, "SF Mono", Menlo, monospace; background: var(--line); padding: 1px 6px; border-radius: 5px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-  .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 12px; padding: 14px 18px; }
   table { width: 100%; border-collapse: collapse; font-size: 15px; }
   td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
   td:first-child { width: 42%; padding-right: 12px; }
@@ -52,7 +51,6 @@
   .why h2 { margin: 0 0 8px; font-size: 17px; }
   .why p { color: var(--muted); }
   .why .aside { font-size: 15px; }
-  footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
   a { color: var(--accent); }
 </style>
 </head>
@@ -72,10 +70,6 @@
   </div>
   <p class="hint">Terminal is in Applications → Utilities, or press ⌘ Space and type “Terminal”.</p>
 
-  <div class="warn" style="margin-top:20px">
-    <strong>Personal setup.</strong> This is for my own Macs and only works with my accounts. The script asks you to type <code class="inline">yes</code> before it installs anything.
-  </div>
-
   <h2>What happens</h2>
   <ol>
     <li><strong>Confirmation:</strong> type <code class="inline">yes</code> to go on.</li>
@@ -83,7 +77,7 @@
     <li><strong>Homebrew:</strong> asks for the Mac's password once.</li>
     <li><strong>GitHub:</strong> shows a one-time code and opens the browser to sign in.</li>
     <li><strong>Private setup repo</strong> is cloned to <code class="inline">~/Developer/mac-setup</code>.</li>
-    <li><strong>Guided setup:</strong> asks what kind of Mac this is, then goes step by step, explaining each one and letting you skip any. Ends with a summary.</li>
+    <li><strong>Guided setup:</strong> asks what kind of Mac this is (see below), then goes step by step.</li>
   </ol>
 
   <h2>Have these ready</h2>
@@ -106,7 +100,6 @@
     <tr><td><code class="inline">~/Developer/mac-setup/setup.sh --check</code></td><td>See what's done and what's missing. Changes nothing.</td></tr>
     <tr><td><code class="inline">~/Developer/mac-setup/setup.sh --guided</code></td><td>Run the guided setup again (safe; done steps are skipped).</td></tr>
     <tr><td><code class="inline">~/Developer/mac-setup/setup.sh secrets</code></td><td>Run a single step (homebrew, packages, shell, git, ssh, secrets, coolify, repos, server).</td></tr>
-    <tr><td>Running the one-liner again</td><td>Safe too: it skips what's installed and updates the setup repo.</td></tr>
   </table>
 
   <h2>If something goes wrong</h2>
@@ -124,7 +117,6 @@
     <li>The real setup: the private <em>mac-setup</em> repo (Brewfiles, <code class="inline">setup.sh</code>, the Keychain map). Its README has the details.</li>
   </ul>
 
-  <footer>Paste into Terminal, type yes, follow along.</footer>
 </main>
 <script>
   function copyCmd(btn) {
