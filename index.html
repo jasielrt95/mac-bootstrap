@@ -48,6 +48,10 @@
   table { width: 100%; border-collapse: collapse; font-size: 15px; }
   td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
   td:first-child { width: 42%; padding-right: 12px; }
+  .why { margin: 4px 0 28px; }
+  .why h2 { margin: 0 0 8px; font-size: 17px; }
+  .why p { color: var(--muted); }
+  .why .aside { font-size: 15px; }
   footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
   a { color: var(--accent); }
 </style>
@@ -55,7 +59,12 @@
 <body>
 <main>
   <h1>Mac setup</h1>
-  <p class="lede">Turns a fresh Mac into my Mac: tools, apps, shell, GitHub, keys and repos. Open Terminal and paste this:</p>
+  <section class="why">
+    <h2>Why this exists</h2>
+    <p>Every so often I get a new Mac, or wipe one and start over, and setting everything up again used to take an afternoon: installing tools and apps, signing in to everything, digging up keys.</p>
+    <p>So I turned it into one command. Now I only need to remember this address: open it, copy the line below, and paste it into Terminal.</p>
+    <p class="aside">If you landed here by accident: hi 👋. This is my personal setup, so it installs my tools and only works with my accounts.</p>
+  </section>
 
   <div class="cmd">
     <code id="cmd">curl -fsSL https://setup.jasielrivera.com | bash</code>
