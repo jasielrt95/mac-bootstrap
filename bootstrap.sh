@@ -66,6 +66,36 @@ main() {
   if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; else eval "$(/usr/local/bin/brew shellenv)"; fi
   grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null || echo "eval \"\$($(command -v brew) shellenv)\"" >>"$HOME/.zprofile"
 
+  # 2b. After a macOS update the command line tools can be "too outdated" for
+  # Homebrew, and installs fail. Homebrew's own check says so; Software Update
+  # usually has the newer tools.
+  if brew doctor 2>&1 | grep -qi "Command Line Tools are too outdated"; then
+    bold "Updating Apple's command line tools (Homebrew says they're too outdated)"
+    local flag=/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress label reply
+    touch "$flag"
+    label="$(softwareupdate --list 2>/dev/null | sed -n 's/^[* ]*Label: \(Command Line Tools.*\)$/\1/p' | tail -1)"
+    rm -f "$flag"
+    if [ -n "$label" ]; then
+      echo "  Installing $label (asks for your Mac password)"
+      sudo softwareupdate --install "$label" --verbose <"$TTY"
+    else
+      echo "  Software Update doesn't offer an update. Homebrew's fix is to reinstall them:"
+      echo "  remove /Library/Developer/CommandLineTools, then run Apple's installer again."
+      printf '  Reinstall the command line tools now? [y/N] '
+      read -r reply <"$TTY" || reply=""
+      case "$reply" in
+        [Yy]*)
+          sudo rm -rf /Library/Developer/CommandLineTools <"$TTY"
+          xcode-select --install >/dev/null 2>&1 || true
+          echo "  Click Install in the window that opens; waiting for it to finish"
+          until xcode-select -p >/dev/null 2>&1 && [ -x /Library/Developer/CommandLineTools/usr/bin/clang ]; do sleep 10; printf '.'; done
+          echo ;;
+        *) echo "  Skipped: installs may fail until the tools are updated (System Settings → General → Software Update)." ;;
+      esac
+    fi
+  fi
+  ok "Command line tools up to date"
+
   # 3. GitHub CLI + sign-in (shows a one-time code and opens the browser).
   command -v gh >/dev/null 2>&1 || { bold "Installing the GitHub CLI"; brew install gh; }
   ok "GitHub CLI"
