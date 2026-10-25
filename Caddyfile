@@ -8,6 +8,8 @@
 	root * /srv
 	header Cache-Control "no-store"
 	header Vary "User-Agent"
+	# Personal tool: keep it out of search engines (link previews still work).
+	header X-Robots-Tag "noindex, nofollow"
 
 	@script path /bootstrap.sh
 	@image path /og.png
