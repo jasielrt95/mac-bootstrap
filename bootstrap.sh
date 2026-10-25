@@ -20,8 +20,30 @@ ok() { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 TTY="${BOOTSTRAP_TTY:-/dev/tty}"
 [ -r "$TTY" ] || { echo "Run this in a Terminal window: curl -fsSL https://setup.jasielrivera.com | bash"; exit 1; }
 
+confirm_personal_use() {
+  printf '\n\033[1;33m%s\033[0m\n' "Read this first"
+  cat <<'MSG'
+  This is Jasiel Rivera's personal Mac setup. It is not a general-purpose tool.
+
+  If you continue, it will install Apple's command line tools, Homebrew and the
+  GitHub CLI, then ask you to sign in to GitHub and continue with a private
+  setup that only works with Jasiel's own accounts.
+
+  If this isn't your setup, stop here: nothing has been installed yet.
+MSG
+  local answer
+  printf '\n  Type "yes" to continue (anything else stops): '
+  read -r answer <"$TTY" || answer=""
+  answer="$(printf '%s' "$answer" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+  if [ "$answer" != "yes" ]; then
+    echo "  Stopped. Nothing was installed."
+    exit 0
+  fi
+}
+
 main() {
   [ "$(uname)" = Darwin ] || { echo "macOS only"; exit 1; }
+  confirm_personal_use
   bold "Setting up this Mac ($(sw_vers -productName) $(sw_vers -productVersion), $(uname -m))"
 
   # 1. Apple's command line tools (git, compilers). The installer is a GUI dialog.
